@@ -1,0 +1,7 @@
+# Backups pessoais e exportações do SONORA
+sonora-backup-*.json
+sonora-sessoes-*.csv
+
+# Arquivos comuns do sistema operacional
+Thumbs.db
+.DS_Store

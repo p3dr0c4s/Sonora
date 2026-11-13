@@ -1,0 +1,918 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11120f">
+
+  <meta name="description" content="Organize seus instrumentos e acompanhe sua evolução musical com o SONORA.">
+
+  <title>SONORA | Gestão musical</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+      <div class="logo">SON<span>O</span>RA</div>
+
+      <p class="sidebar-subtitle">Gestão musical</p>
+
+      <nav>
+        <a href="#dashboard" id="dashboardLink" class="active">
+          Dashboard
+        </a>
+
+        <a href="#instruments" id="instrumentsLink">
+          Instrumentos
+        </a>
+
+        <a href="#studies">
+          Sessões de estudo
+        </a>
+
+        <a href="#goals">
+          Metas
+        </a>
+
+        <a href="#evolution">
+          Evolução
+        </a>
+
+        <a href="#statistics">
+          Estatísticas
+        </a>
+
+        <a href="#dataManagement">
+          Dados
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        Sua música. Sua prática. Seu espaço.
+      </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT -->
+
+    <main class="content">
+
+      <div id="appNotice" class="app-notice" role="status" aria-live="polite" hidden>
+        <span id="noticeMessage"></span>
+        <button type="button" id="dismissNotice" aria-label="Fechar mensagem">×</button>
+      </div>
+
+      <!-- DASHBOARD VIEW -->
+
+      <div id="dashboardView">
+
+        <header class="topbar">
+          <p>SONORA / Central de controle</p>
+          <p>Espaço pessoal</p>
+        </header>
+
+        <!-- WELCOME -->
+
+        <section class="welcome" id="dashboard">
+
+          <h1>Bem-vindo ao seu estúdio.</h1>
+
+          <p>
+            Organize seus equipamentos, acompanhe seus estudos
+            e mantenha sua evolução musical em um só lugar.
+          </p>
+
+        </section>
+
+        <!-- DASHBOARD METRICS -->
+
+        <section class="cards">
+
+          <div class="stat-card">
+            <p>Instrumentos cadastrados</p>
+            <h2 id="instrumentCount">0</h2>
+          </div>
+
+          <div class="stat-card">
+            <p>Sessões realizadas</p>
+            <h2 id="sessionCount">0</h2>
+          </div>
+
+          <div class="stat-card">
+            <p>Tempo total de estudo</p>
+            <h2 id="practiceTime">0h 0min</h2>
+          </div>
+
+        </section>
+
+        <!-- STUDIO OVERVIEW -->
+
+        <section class="studio-overview">
+
+          <div class="section-header">
+            <h2>Visão geral do estúdio</h2>
+            <p>
+              Um resumo da sua atividade e dos seus equipamentos.
+            </p>
+          </div>
+
+          <div class="overview-grid">
+
+            <!-- WEEKLY PRACTICE -->
+
+            <article class="overview-panel weekly-panel">
+
+              <div class="panel-heading">
+                <div>
+                  <span class="panel-eyebrow">DESEMPENHO</span>
+                  <h3>Prática semanal</h3>
+                </div>
+
+                <span class="panel-indicator">ÚLTIMOS 7 DIAS</span>
+              </div>
+
+              <div class="weekly-total">
+                <strong id="weeklyPracticeTime">0h 0min</strong>
+                <span>tempo de prática</span>
+              </div>
+
+              <div class="weekly-chart" id="weeklyChart">
+
+                <div class="chart-day" data-day="1">
+                  <div class="chart-track">
+                    <div class="chart-bar" style="height: 0%"></div>
+                  </div>
+                  <span>SEG</span>
+                </div>
+
+                <div class="chart-day" data-day="2">
+                  <div class="chart-track">
+                    <div class="chart-bar" style="height: 0%"></div>
+                  </div>
+                  <span>TER</span>
+                </div>
+
+                <div class="chart-day" data-day="3">
+                  <div class="chart-track">
+                    <div class="chart-bar" style="height: 0%"></div>
+                  </div>
+                  <span>QUA</span>
+                </div>
+
+                <div class="chart-day" data-day="4">
+                  <div class="chart-track">
+                    <div class="chart-bar" style="height: 0%"></div>
+                  </div>
+                  <span>QUI</span>
+                </div>
+
+                <div class="chart-day" data-day="5">
+                  <div class="chart-track">
+                    <div class="chart-bar" style="height: 0%"></div>
+                  </div>
+                  <span>SEX</span>
+                </div>
+
+                <div class="chart-day" data-day="6">
+                  <div class="chart-track">
+                    <div class="chart-bar" style="height: 0%"></div>
+                  </div>
+                  <span>SÁB</span>
+                </div>
+
+                <div class="chart-day" data-day="0">
+                  <div class="chart-track">
+                    <div class="chart-bar" style="height: 0%"></div>
+                  </div>
+                  <span>DOM</span>
+                </div>
+
+              </div>
+
+            </article>
+
+            <!-- EQUIPMENT STATUS -->
+
+            <article class="overview-panel equipment-panel">
+
+              <div class="panel-heading">
+                <div>
+                  <span class="panel-eyebrow">EQUIPAMENTOS</span>
+                  <h3>Estado do equipamento</h3>
+                </div>
+              </div>
+
+              <div class="equipment-summary">
+
+                <div class="equipment-stat">
+                  <span class="equipment-dot good"></span>
+                  <span>Em boas condições</span>
+                  <strong id="equipmentGood">0</strong>
+                </div>
+
+                <div class="equipment-stat">
+                  <span class="equipment-dot attention"></span>
+                  <span>Precisam de atenção</span>
+                  <strong id="equipmentAttention">0</strong>
+                </div>
+
+                <div class="equipment-stat">
+                  <span class="equipment-dot maintenance"></span>
+                  <span>Manutenção necessária</span>
+                  <strong id="equipmentMaintenance">0</strong>
+                </div>
+
+              </div>
+
+              <div class="equipment-footer">
+                <span>Total de equipamentos</span>
+                <strong id="equipmentTotal">0</strong>
+              </div>
+
+            </article>
+
+          </div>
+
+          <!-- RECENT ACTIVITY -->
+
+          <div class="overview-panel recent-panel">
+
+            <div class="panel-heading">
+              <div>
+                <span class="panel-eyebrow">REGISTROS</span>
+                <h3>Atividade recente</h3>
+              </div>
+
+              <span class="panel-indicator">SEU ESTÚDIO</span>
+            </div>
+
+            <div id="recentActivity" class="recent-activity">
+
+              <p class="empty-history">
+                Suas atividades recentes aparecerão aqui.
+              </p>
+
+            </div>
+
+          </div>
+
+          <!-- QUICK ACTIONS -->
+
+          <div class="quick-actions">
+
+            <div>
+              <span class="panel-eyebrow">ATALHOS</span>
+              <h3>O que vamos fazer hoje?</h3>
+            </div>
+
+            <div class="quick-action-buttons">
+
+              <a href="#instruments" class="btn">
+                + Adicionar equipamento
+              </a>
+
+              <a href="#studies" class="btn btn-secondary">
+                Iniciar prática
+              </a>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- STUDY STATISTICS -->
+
+        <section class="section" id="statistics">
+          <div class="section-header">
+            <h2>Estatísticas de estudo</h2>
+            <p>Seu ritmo de prática hoje, nos últimos sete dias e neste mês.</p>
+          </div>
+
+          <div class="statistics-summary">
+            <article class="stat-card statistic-card">
+              <span class="statistic-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M7 3v3m10-3v3M4 9h16M6 5h12a2 2 0 0 1 2 2v12H4V7a2 2 0 0 1 2-2Zm3 8h2m2 0h2m-6 4h2"/></svg>
+              </span>
+              <div><p>Hoje</p><h2 id="dailyStudyTime">0h 0min</h2></div>
+            </article>
+
+            <article class="stat-card statistic-card">
+              <span class="statistic-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 19V5m0 14h17M8 16v-5m5 5V7m5 9v-8"/></svg>
+              </span>
+              <div><p>Últimos 7 dias</p><h2 id="weeklyStudyTime">0h 0min</h2></div>
+            </article>
+
+            <article class="stat-card statistic-card">
+              <span class="statistic-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 5h16v15H4zM8 3v4m8-4v4M4 9h16m-11 4h2m3 0h2m-7 3h2"/></svg>
+              </span>
+              <div><p>Neste mês</p><h2 id="monthlyStudyTime">0h 0min</h2></div>
+            </article>
+          </div>
+
+          <div class="statistics-panels">
+            <article class="overview-panel">
+              <div class="panel-heading">
+                <div><span class="panel-eyebrow">INSTRUMENTOS</span><h3>Mais praticados</h3></div>
+                <span class="panel-indicator">NESTE MÊS</span>
+              </div>
+              <div id="instrumentRanking" class="instrument-ranking"></div>
+            </article>
+
+            <article class="overview-panel">
+              <div class="panel-heading">
+                <div><span class="panel-eyebrow">CONSISTÊNCIA</span><h3>Evolução das metas</h3></div>
+                <span class="panel-indicator">ÚLTIMAS 4 SEMANAS</span>
+              </div>
+              <div id="goalEvolution" class="goal-evolution"></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- INSTRUMENTS -->
+
+        <section class="section" id="instruments">
+
+          <div class="section-header">
+            <h2>Meus instrumentos</h2>
+
+            <p>
+              Gerencie seus equipamentos e mantenha
+              suas informações organizadas.
+            </p>
+          </div>
+
+          <!-- SEARCH AND FILTER -->
+
+          <div class="instrument-tools">
+
+            <input
+              type="search"
+              id="instrumentSearch"
+              placeholder="Pesquisar por nome, marca, modelo ou categoria..."
+            >
+
+            <select id="instrumentFilter">
+              <option value="Todos">Todas as categorias</option>
+              <option value="Cordas">Cordas</option>
+              <option value="Teclas">Teclas</option>
+              <option value="Percussão">Percussão</option>
+              <option value="Sopro">Sopro</option>
+              <option value="Eletrônico">Eletrônico</option>
+              <option value="Acessório">Acessório</option>
+              <option value="Outro">Outro</option>
+            </select>
+
+            <select id="instrumentConditionFilter" aria-label="Filtrar por estado">
+              <option value="Todos">Todos os estados</option>
+              <option value="Novo">Novo</option>
+              <option value="Excelente">Excelente</option>
+              <option value="Bom">Bom</option>
+              <option value="Regular">Regular</option>
+              <option value="Precisa de manutenção">Precisa de manutenção</option>
+            </select>
+
+            <select id="instrumentSort" aria-label="Ordenar instrumentos">
+              <option value="recent">Mais recentes</option>
+              <option value="name-asc">Nome (A–Z)</option>
+              <option value="name-desc">Nome (Z–A)</option>
+            </select>
+
+          </div>
+
+          <!-- NEW INSTRUMENT FORM -->
+
+          <form id="instrumentForm" class="form-card">
+
+            <div class="form-grid">
+
+              <div class="form-group">
+                <label for="instrumentName">
+                  Nome do instrumento *
+                </label>
+
+                <input
+                  type="text"
+                  id="instrumentName"
+                  placeholder="Ex: Guitarra Stratocaster"
+                  required
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="instrumentCategory">
+                  Categoria
+                </label>
+
+                <select id="instrumentCategory" required>
+                  <option value="">Selecione uma categoria</option>
+                  <option value="Cordas">Cordas</option>
+                  <option value="Teclas">Teclas</option>
+                  <option value="Percussão">Percussão</option>
+                  <option value="Sopro">Sopro</option>
+                  <option value="Eletrônico">Eletrônico</option>
+                  <option value="Acessório">Acessório</option>
+                  <option value="Outro">Outro</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="instrumentBrand">Marca</label>
+
+                <input
+                  type="text"
+                  id="instrumentBrand"
+                  placeholder="Ex: Fender"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="instrumentCondition">
+                  Estado de conservação
+                </label>
+
+                <select id="instrumentCondition">
+                  <option value="Novo">Novo</option>
+                  <option value="Excelente">Excelente</option>
+                  <option value="Bom">Bom</option>
+                  <option value="Regular">Regular</option>
+                  <option value="Precisa de manutenção">
+                    Precisa de manutenção
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group full-width">
+                <label for="instrumentImage">
+                  Foto do instrumento
+                </label>
+
+                <input
+                  type="file"
+                  id="instrumentImage"
+                  accept="image/*"
+                >
+              </div>
+
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn">
+                + Adicionar instrumento
+              </button>
+            </div>
+
+          </form>
+
+          <!-- INSTRUMENT LIST -->
+
+          <div id="instrumentList" class="instrument-list">
+
+            <div class="empty-state">
+              Seus instrumentos aparecerão aqui.
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- PRACTICE GOALS -->
+
+        <section class="section" id="goals">
+
+          <div class="section-header">
+            <h2>Metas de prática</h2>
+            <p>Defina seu tempo de estudo semanal, no geral e por instrumento.</p>
+          </div>
+
+          <form id="goalsForm" class="form-card">
+            <div class="form-group goal-weekly-field">
+              <label for="weeklyGoal">Meta semanal geral (minutos)</label>
+              <input type="number" id="weeklyGoal" min="0" step="5" placeholder="Ex: 300">
+            </div>
+
+            <div id="instrumentGoals" class="instrument-goals"></div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn">Salvar metas</button>
+            </div>
+          </form>
+
+          <div id="goalProgress" class="goal-progress"></div>
+
+        </section>
+
+        <!-- STUDY TIMER -->
+
+        <section class="section" id="studies">
+
+          <div class="section-header">
+            <h2>Sessões de estudo</h2>
+
+            <p>
+              Acompanhe seu tempo de prática e mantenha
+              uma rotina consistente.
+            </p>
+          </div>
+
+          <div class="activity">
+
+            <div class="timer-card">
+
+              <h3>Cronômetro de estudo</h3>
+
+              <div class="form-group session-mode-field">
+                <label for="sessionMode">Tipo de prática</label>
+                <select id="sessionMode">
+                  <option value="free">Prática livre</option>
+                  <option value="planned">Prática planejada</option>
+                </select>
+              </div>
+
+              <div id="plannedPracticeFields" class="planned-fields" hidden>
+                <div class="form-group">
+                  <label for="plannedInstrument">Instrumento *</label>
+                  <select id="plannedInstrument" required>
+                    <option value="">Selecione um instrumento</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="plannedObjective">Objetivo *</label>
+                  <input type="text" id="plannedObjective" placeholder="Ex: melhorar a troca de acordes" required>
+                </div>
+
+                <div class="form-group">
+                  <label for="plannedContent">Conteúdo *</label>
+                  <textarea id="plannedContent" placeholder="O que você vai praticar nesta sessão?" required></textarea>
+                </div>
+              </div>
+
+              <div class="timer" id="timer">
+                00:00:00
+              </div>
+
+              <div class="timer-controls">
+
+                <button
+                  type="button"
+                  class="btn"
+                  id="startButton"
+                >
+                  Iniciar
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  id="pauseButton"
+                >
+                  Pausar
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  id="resetButton"
+                >
+                  Reiniciar
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  id="finishButton"
+                >
+                  Finalizar sessão
+                </button>
+
+              </div>
+
+              <form id="sessionDetailsForm" class="session-details-form" hidden>
+                <h4>Detalhes da sessão</h4>
+
+                <div id="freeSessionDetails" class="form-grid">
+                  <div class="form-group">
+                    <label for="sessionInstrument">Instrumento</label>
+                    <select id="sessionInstrument">
+                      <option value="">Sem instrumento específico</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="sessionObjective">Objetivo</label>
+                    <input type="text" id="sessionObjective" placeholder="O que você praticou?">
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label for="sessionContent">Conteúdo</label>
+                    <textarea id="sessionContent" placeholder="Exercícios, músicas ou técnicas praticadas"></textarea>
+                  </div>
+                </div>
+
+                <div class="form-grid session-reflection">
+                  <div class="form-group">
+                    <label for="sessionDifficulty">Dificuldades</label>
+                    <input type="text" id="sessionDifficulty" placeholder="O que foi mais desafiador?">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="sessionNotes">Anotações</label>
+                    <textarea id="sessionNotes" placeholder="Registre observações para a próxima prática"></textarea>
+                  </div>
+                </div>
+
+                <div class="form-actions session-detail-actions">
+                  <button type="button" class="btn btn-secondary" id="cancelSessionDetails">Voltar ao cronômetro</button>
+                  <button type="submit" class="btn">Salvar sessão</button>
+                </div>
+              </form>
+
+            </div>
+
+            <div class="history">
+
+              <div class="history-header">
+                <h3>Sobre suas sessões</h3>
+              </div>
+
+              <p class="section-intro">
+                Ao finalizar, registre os detalhes da prática para salvar
+                a sessão e acompanhar sua evolução.
+              </p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- STUDY HISTORY -->
+
+        <section class="section" id="evolution">
+
+          <div class="section-header">
+            <h2>Sua evolução</h2>
+
+            <p>
+              Acompanhe sessões, dificuldades e anotações de cada prática.
+            </p>
+          </div>
+
+          <div class="history">
+
+            <div class="history-list" id="sessionHistory">
+
+              <p class="empty-history">
+                Nenhuma sessão registrada ainda.
+              </p>
+
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- DATA MANAGEMENT -->
+
+        <section class="section" id="dataManagement">
+          <div class="section-header">
+            <h2>Backup e exportação</h2>
+            <p>Seus dados permanecem neste dispositivo. Exporte uma cópia para guardar ou restaurar depois.</p>
+          </div>
+
+          <div class="data-tools-grid">
+            <article class="data-tool-card">
+              <span class="data-tool-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/></svg>
+              </span>
+              <h3>Backup completo</h3>
+              <p>Baixe instrumentos, sessões e metas em um arquivo JSON.</p>
+              <button type="button" class="btn" id="exportBackupButton">Exportar backup JSON</button>
+            </article>
+
+            <article class="data-tool-card">
+              <span class="data-tool-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM4 9h16M9 4v16m6-11h2m-2 4h2m-9-4h2m-2 4h2"/></svg>
+              </span>
+              <h3>Histórico de sessões</h3>
+              <p>Exporte datas, duração, instrumentos, conteúdo e anotações em CSV.</p>
+              <button type="button" class="btn btn-secondary" id="exportSessionsCsvButton">Exportar histórico CSV</button>
+            </article>
+
+            <article class="data-tool-card">
+              <span class="data-tool-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5M4 14v6h16v-6"/></svg>
+              </span>
+              <h3>Restaurar backup</h3>
+              <p>A restauração substitui os dados locais. Um backup atual será baixado antes da troca.</p>
+              <button type="button" class="btn btn-secondary file-button" id="chooseRestoreFile">Selecionar arquivo JSON</button>
+              <input type="file" id="restoreBackupFile" accept=".json,application/json" hidden>
+            </article>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- INSTRUMENT DETAIL VIEW -->
+
+      <section
+        id="instrumentDetailView"
+        class="detail-view"
+        hidden
+      >
+
+        <header class="topbar detail-topbar">
+
+          <p>SONORA / Instrumentos / Detalhes</p>
+
+          <button
+            type="button"
+            id="backToInstruments"
+            class="btn btn-secondary"
+          >
+            ← Voltar
+          </button>
+
+        </header>
+
+        <!-- INSTRUMENT HEADING -->
+
+        <div class="detail-heading">
+
+          <h1 id="detailName">Instrumento</h1>
+
+          <p id="detailSubtitle">
+            Informações do equipamento
+          </p>
+
+        </div>
+
+        <!-- INSTRUMENT INFORMATION -->
+
+        <form id="instrumentDetailsForm" class="detail-card">
+
+          <h2>Informações do instrumento</h2>
+
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="detailModel">Modelo</label>
+
+              <input
+                type="text"
+                id="detailModel"
+                placeholder="Modelo do instrumento"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="detailSerial">Número de série</label>
+
+              <input
+                type="text"
+                id="detailSerial"
+                placeholder="Número de série"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="detailPurchaseDate">
+                Data de aquisição
+              </label>
+
+              <input
+                type="date"
+                id="detailPurchaseDate"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="detailPrice">
+                Valor de aquisição (R$)
+              </label>
+
+              <input
+                type="number"
+                id="detailPrice"
+                min="0"
+                step="0.01"
+                placeholder="0,00"
+              >
+            </div>
+
+            <div class="form-group full-width">
+              <label for="detailCondition">
+                Estado de conservação
+              </label>
+
+              <select id="detailCondition">
+                <option value="Novo">Novo</option>
+                <option value="Excelente">Excelente</option>
+                <option value="Bom">Bom</option>
+                <option value="Regular">Regular</option>
+                <option value="Precisa de manutenção">
+                  Precisa de manutenção
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="detailNotes">Observações</label>
+
+              <textarea
+                id="detailNotes"
+                placeholder="Anotações, características e informações importantes..."
+              ></textarea>
+            </div>
+
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn">
+              Salvar alterações
+            </button>
+          </div>
+
+        </form>
+
+        <!-- MAINTENANCE -->
+
+        <div class="detail-card">
+
+          <h2>Histórico de manutenção</h2>
+
+          <form id="maintenanceForm">
+
+            <div class="form-grid">
+
+              <div class="form-group">
+                <label for="maintenanceDate">
+                  Data do serviço
+                </label>
+
+                <input
+                  type="date"
+                  id="maintenanceDate"
+                >
+              </div>
+
+              <div class="form-group">
+                <label for="maintenanceDescription">
+                  Descrição do serviço
+                </label>
+
+                <input
+                  type="text"
+                  id="maintenanceDescription"
+                  placeholder="Ex: Troca de cordas"
+                  required
+                >
+              </div>
+
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn">
+                + Registrar manutenção
+              </button>
+            </div>
+
+          </form>
+
+          <div
+            id="maintenanceHistory"
+            class="maintenance-list"
+          >
+
+            <p class="empty-history">
+              Nenhuma manutenção registrada.
+            </p>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- JAVASCRIPT -->
+
+  <script src="data-tools.js"></script>
+  <script src="script.js"></script>
+
+</body>
+</html>
