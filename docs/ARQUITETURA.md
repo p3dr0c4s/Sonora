@@ -20,14 +20,15 @@ O estado é armazenado no `localStorage` da origem atual:
 | `sonora_instruments` | Lista de instrumentos e seus dados de conservação/manutenção |
 | `sonora_sessions` | Histórico de sessões de estudo |
 | `sonora_practice_goals` | Meta semanal geral e metas por instrumento |
+| `sonora_active_session` | Estado temporário do cronômetro e plano da prática em andamento |
 
 O armazenamento é local ao perfil do navegador. Não há sincronização entre origens, dispositivos ou perfis. Erros de leitura são informados e bloqueiam gravações na chave afetada para evitar sobrescrever dados que não puderam ser recuperados. A importação de um backup validado pode reparar esses dados.
 
 ## Sessões e estatísticas
 
-Uma prática pode ser livre ou planejada. A prática planejada exige instrumento, objetivo e conteúdo antes de iniciar; na prática livre esses detalhes podem ser adicionados ao finalizar. A duração é medida com base no relógio (`Date.now()`), e as sessões são salvas no histórico com instrumento, modo, duração, conteúdo e reflexão.
+Uma prática pode ser livre ou planejada. A prática planejada exige instrumento, objetivo e conteúdo antes de iniciar; na prática livre esses detalhes podem ser adicionados ao finalizar. O estado do cronômetro e o plano são persistidos separadamente do histórico para recuperar sessões ativas ou pausadas após uma atualização. Ao salvar ou redefinir a prática, esse estado temporário é removido.
 
-As estatísticas são calculadas no navegador a partir das sessões e metas salvas. Não há serviço remoto ou cálculo no servidor.
+A duração é medida com base no relógio (`Date.now()`), e as sessões são salvas no histórico com instrumento, modo, duração, conteúdo e reflexão. As estatísticas são calculadas no navegador a partir das sessões e metas salvas; limites de dias e semanas usam o calendário local para respeitar mudanças de horário de verão. Não há serviço remoto ou cálculo no servidor.
 
 ## Importação e exportação
 
@@ -58,4 +59,5 @@ Não é necessário instalar dependências. Sirva a pasta localmente, por exempl
 ```powershell
 node --check .\script.js
 node --check .\data-tools.js
+node --test .\tests\sonora.test.js
 ```

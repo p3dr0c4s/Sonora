@@ -7,6 +7,7 @@
 const INSTRUMENTS_KEY = "sonora_instruments";
 const SESSIONS_KEY = "sonora_sessions";
 const GOALS_KEY = "sonora_practice_goals";
+const ACTIVE_SESSION_KEY = "sonora_active_session";
 
 let noticeTimeout = null;
 
@@ -45,7 +46,8 @@ const storageReadErrors = new Set();
 const STORAGE_LABELS = {
   [INSTRUMENTS_KEY]: "instrumentos",
   [SESSIONS_KEY]: "sessões",
-  [GOALS_KEY]: "metas"
+  [GOALS_KEY]: "metas",
+  [ACTIVE_SESSION_KEY]: "prática em andamento"
 };
 
 function loadData(key) {
@@ -219,6 +221,16 @@ function getLocalDayStart(date = new Date()) {
   ).getTime();
 }
 
+function getLocalDayStartOffset(dayOffset, date = new Date()) {
+  const shiftedDate = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  );
+  shiftedDate.setDate(shiftedDate.getDate() + dayOffset);
+  return shiftedDate.getTime();
+}
+
 function getSessionTimestamp(session) {
   if (Number.isFinite(Number(session.timestamp)) && session.timestamp > 0) {
     return Number(session.timestamp);
@@ -280,6 +292,7 @@ let timerInterval = null;
 let timerStartedAt = null;
 let sessionActive = false;
 let pendingSessionPlan = null;
+let activeSessionStorageUnreadable = false;
 
 function formatTime(seconds) {
   const hours = Math.floor(seconds / 3600);
@@ -299,8 +312,94 @@ function updateTimerDisplay() {
   }
 }
 
+function loadActiveSession() {
+  try {
+    const raw = localStorage.getItem(ACTIVE_SESSION_KEY);
+    if (raw === null) return null;
+
+    const state = JSON.parse(raw);
+    const plan = state?.plan;
+    if (
+      !state ||
+      typeof state !== "object" ||
+      state.version !== 1 ||
+      !Number.isSafeInteger(state.elapsedSeconds) ||
+      state.elapsedSeconds < 0 ||
+      (state.startedAt !== null &&
+        (!Number.isFinite(state.startedAt) || state.startedAt <= 0)) ||
+      !plan ||
+      !["free", "planned"].includes(plan.mode)
+    ) {
+      throw new Error("O estado armazenado da prática é inválido.");
+    }
+
+    if (
+      plan.mode === "planned" &&
+      (!["string", "number"].includes(typeof plan.instrumentId) ||
+        !String(plan.instrumentName || "").trim() ||
+        !String(plan.objective || "").trim() ||
+        !String(plan.content || "").trim())
+    ) {
+      throw new Error("O plano da prática armazenada é inválido.");
+    }
+
+    return state;
+  } catch (error) {
+    console.error("Erro ao recuperar prática em andamento:", error);
+    activeSessionStorageUnreadable = true;
+    showNotice(
+      "Não foi possível recuperar a prática em andamento. Redefina o cronômetro para descartar o estado inválido.",
+      "error"
+    );
+    return null;
+  }
+}
+
+function persistActiveSession() {
+  if (activeSessionStorageUnreadable) return false;
+
+  try {
+    localStorage.setItem(ACTIVE_SESSION_KEY, JSON.stringify({
+      version: 1,
+      elapsedSeconds,
+      startedAt: timerStartedAt,
+      plan: pendingSessionPlan || { mode: "free" }
+    }));
+    return true;
+  } catch (error) {
+    console.error("Erro ao salvar prática em andamento:", error);
+    showNotice(
+      "Não foi possível salvar a prática em andamento neste navegador.",
+      "error"
+    );
+    return false;
+  }
+}
+
+function clearActiveSession() {
+  try {
+    localStorage.removeItem(ACTIVE_SESSION_KEY);
+    activeSessionStorageUnreadable = false;
+    return true;
+  } catch (error) {
+    console.error("Erro ao limpar prática em andamento:", error);
+    showNotice(
+      "Não foi possível limpar a prática em andamento do armazenamento local.",
+      "error"
+    );
+    return false;
+  }
+}
+
 function startTimer() {
   if (timerInterval !== null) return;
+  if (activeSessionStorageUnreadable) {
+    showNotice(
+      "Redefina o cronômetro antes de iniciar uma nova prática.",
+      "error"
+    );
+    return;
+  }
 
   if (!sessionActive && sessionMode?.value === "planned") {
     const instrument = instruments.find(
@@ -330,28 +429,37 @@ function startTimer() {
   if (plannedContent) plannedContent.disabled = true;
 
   timerStartedAt = Date.now() - (elapsedSeconds * 1000);
+  persistActiveSession();
   timerInterval = setInterval(() => {
-    elapsedSeconds = Math.floor((Date.now() - timerStartedAt) / 1000);
+    elapsedSeconds = Math.max(
+      elapsedSeconds,
+      Math.floor((Date.now() - timerStartedAt) / 1000)
+    );
     updateTimerDisplay();
   }, 250);
 }
 
-function pauseTimer() {
+function pauseTimer({ persist = true } = {}) {
   if (timerStartedAt !== null) {
-    elapsedSeconds = Math.floor((Date.now() - timerStartedAt) / 1000);
+    elapsedSeconds = Math.max(
+      elapsedSeconds,
+      Math.floor((Date.now() - timerStartedAt) / 1000)
+    );
     timerStartedAt = null;
     updateTimerDisplay();
   }
   clearInterval(timerInterval);
   timerInterval = null;
+  if (persist && sessionActive) persistActiveSession();
 }
 
 function resetTimer() {
-  pauseTimer();
+  pauseTimer({ persist: false });
   elapsedSeconds = 0;
   timerStartedAt = null;
   sessionActive = false;
   pendingSessionPlan = null;
+  clearActiveSession();
   if (sessionMode) sessionMode.disabled = false;
   if (plannedInstrument) plannedInstrument.disabled = false;
   if (plannedObjective) plannedObjective.disabled = false;
@@ -362,6 +470,51 @@ function resetTimer() {
   }
   if (timerControls) timerControls.hidden = false;
   updateTimerDisplay();
+}
+
+function restoreActiveSession() {
+  const state = loadActiveSession();
+  if (!state) return;
+
+  const now = Date.now();
+  timerStartedAt = state.startedAt !== null && state.startedAt > now
+    ? now - (state.elapsedSeconds * 1000)
+    : state.startedAt;
+  elapsedSeconds = timerStartedAt === null
+    ? state.elapsedSeconds
+    : Math.max(
+      state.elapsedSeconds,
+      Math.floor((now - timerStartedAt) / 1000)
+    );
+  pendingSessionPlan = state.plan;
+  sessionActive = true;
+
+  if (sessionMode) {
+    sessionMode.value = state.plan.mode;
+    sessionMode.dispatchEvent(new Event("change"));
+    sessionMode.disabled = true;
+  }
+  if (state.plan.mode === "planned") {
+    if (plannedInstrument) plannedInstrument.value = String(state.plan.instrumentId);
+    if (plannedObjective) plannedObjective.value = state.plan.objective;
+    if (plannedContent) plannedContent.value = state.plan.content;
+  }
+  if (plannedInstrument) plannedInstrument.disabled = true;
+  if (plannedObjective) plannedObjective.disabled = true;
+  if (plannedContent) plannedContent.disabled = true;
+
+  updateTimerDisplay();
+  if (timerStartedAt !== null) {
+    timerInterval = setInterval(() => {
+      elapsedSeconds = Math.max(
+        elapsedSeconds,
+        Math.floor((Date.now() - timerStartedAt) / 1000)
+      );
+      updateTimerDisplay();
+    }, 250);
+  }
+
+  showNotice("Prática em andamento recuperada.");
 }
 
 function finishSession() {
@@ -496,14 +649,13 @@ function renderWeeklyPractice() {
   if (!chart || !totalElement) return;
 
   const today = new Date();
-  const todayStart = getLocalDayStart(today);
-
-  const weekStart = todayStart - (6 * 86400000);
+  const weekStart = getLocalDayStartOffset(-6, today);
+  const tomorrowStart = getLocalDayStartOffset(1, today);
 
   const dailyTotals = {};
 
   for (let i = 0; i < 7; i++) {
-    const date = new Date(weekStart + i * 86400000);
+    const date = new Date(getLocalDayStartOffset(i - 6, today));
     const day = date.getDay();
 
     dailyTotals[day] = 0;
@@ -516,7 +668,7 @@ function renderWeeklyPractice() {
 
     if (!timestamp) return;
 
-    if (timestamp < weekStart || timestamp >= todayStart + 86400000) {
+    if (timestamp < weekStart || timestamp >= tomorrowStart) {
       return;
     }
 
@@ -1091,9 +1243,9 @@ function renderInstrumentGoalInputs() {
 }
 
 function getWeeklySessionTotals(weekOffset = 0) {
-  const todayStart = getLocalDayStart();
-  const weekStart = todayStart - ((6 + 7 * weekOffset) * 86400000);
-  const weekEnd = weekStart + (7 * 86400000);
+  const today = new Date();
+  const weekStart = getLocalDayStartOffset(-6 - (7 * weekOffset), today);
+  const weekEnd = getLocalDayStartOffset(1 - (7 * weekOffset), today);
   const totals = { seconds: 0, instruments: {} };
 
   sessions.forEach(session => {
@@ -1274,9 +1426,10 @@ function renderGoalEvolution() {
 
   container.innerHTML = "";
 
+  const today = new Date();
   for (let offset = 3; offset >= 0; offset--) {
-    const start = getLocalDayStart() - ((6 + 7 * offset) * 86400000);
-    const end = start + (7 * 86400000);
+    const start = getLocalDayStartOffset(-6 - (7 * offset), today);
+    const lastDay = getLocalDayStartOffset(-7 * offset, today);
     const totals = getWeeklySessionTotals(offset);
     const card = document.createElement("article");
     card.className = "goal-week";
@@ -1287,7 +1440,7 @@ function renderGoalEvolution() {
     const label = document.createElement("strong");
     label.textContent = offset === 0
       ? "Últimos 7 dias"
-      : `${formatDate(start)} – ${formatDate(end - 86400000)}`;
+      : `${formatDate(start)} – ${formatDate(lastDay)}`;
 
     const value = document.createElement("span");
     value.textContent = formatStudyDuration(totals.seconds);
@@ -1363,8 +1516,8 @@ function renderGoalEvolution() {
 function renderStudyStatistics() {
   const now = new Date();
   const todayStart = getLocalDayStart(now);
-  const tomorrow = todayStart + 86400000;
-  const weekStart = todayStart - (6 * 86400000);
+  const tomorrow = getLocalDayStartOffset(1, now);
+  const weekStart = getLocalDayStartOffset(-6, now);
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1).getTime();
   let dailySeconds = 0;
@@ -2306,6 +2459,8 @@ function initializeSonora() {
   if (maintenanceDate && !maintenanceDate.value) {
     maintenanceDate.value = new Date().toISOString().slice(0, 10);
   }
+
+  restoreActiveSession();
 }
 
 initializeSonora();

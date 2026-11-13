@@ -1,60 +1,61 @@
 # SONORA
 
-Gestão musical pessoal para organizar instrumentos e acompanhar a rotina de estudos. O SONORA é uma aplicação web estática: não precisa de backend, conta ou dependências de terceiros, e mantém os dados no `localStorage` do navegador.
+Seu espaço para organizar instrumentos e acompanhar seus estudos musicais.
 
-## Funcionalidades
+**Acesse o SONORA:** [p3dr0c4s.github.io/Sonora](https://p3dr0c4s.github.io/Sonora/)
 
-- Cadastro e organização de instrumentos, com busca, filtros, estado de conservação e histórico de manutenção.
-- Práticas livres ou planejadas, cronômetro com pausa e registro do conteúdo, dificuldades e anotações.
-- Histórico de sessões com edição e exclusão.
-- Metas semanais gerais e individuais por instrumento.
-- Estatísticas diárias, semanais e mensais, instrumentos mais praticados e evolução das metas.
-- Exportação de backup JSON e do histórico em CSV; restauração validada de backups.
-- Interface responsiva em português.
+## O que você pode fazer
 
-## Como executar
+- Cadastrar seus instrumentos e acompanhar o estado de cada um.
+- Usar o cronômetro em práticas livres ou planejar o que vai estudar.
+- Registrar sessões, dificuldades e anotações.
+- Definir metas semanais e acompanhar seu progresso.
+- Exportar seus dados para fazer backup.
 
-Não há etapa de instalação nem processo de build. Com Python instalado, abra um terminal nesta pasta e execute:
+## Como usar
 
-```powershell
-py -m http.server 8000
-```
+Não precisa instalar nada: abra o [SONORA no navegador](https://p3dr0c4s.github.io/Sonora/).
 
-Depois, acesse <http://localhost:8000>. Para encerrar o servidor, pressione `Ctrl+C` no terminal. Também é possível abrir `index.html` diretamente, mas servir a pasta localmente tende a oferecer comportamento mais consistente entre navegadores.
+Se quiser executar uma cópia no seu computador, tenha o Python instalado e:
 
-## Dados e backups
+1. Abra um terminal na pasta do projeto.
+2. Execute:
 
-Os dados ficam no armazenamento local do navegador e não são enviados a um servidor. Eles são vinculados ao perfil do navegador e à origem usada para abrir o app; não são sincronizados entre dispositivos ou navegadores. Limpar os dados do site pode apagá-los.
+   ```powershell
+   py -m http.server 8000
+   ```
 
-Faça backups periódicos pela seção **Dados**:
+3. Abra <http://localhost:8000> no navegador.
+4. Para parar, volte ao terminal e pressione `Ctrl+C`.
 
-- **JSON** guarda instrumentos, sessões e metas e pode ser restaurado no SONORA.
-- **CSV** exporta o histórico de sessões para consulta em planilhas; não é um formato de restauração.
-- Restaurar um backup substitui os dados atuais. Antes da restauração, o app baixa uma cópia dos dados atuais.
+## Seus dados e backups
 
-Backups e exportações podem conter informações pessoais. Mantenha-os em local seguro e não os adicione ao repositório. Os padrões desses arquivos estão no `.gitignore`.
+Seus dados ficam salvos no navegador que você usa. Eles não são enviados a um servidor nem sincronizados com outros dispositivos. Se limpar os dados do site ou trocar de navegador, você pode perdê-los.
 
-## Estrutura do projeto
+Para se proteger, abra a seção **Dados** no SONORA e faça backups:
 
-```text
-index.html       Interface e conteúdo
-style.css        Estilos e layout responsivo
-script.js        Fluxos da aplicação e persistência local
-data-tools.js    Leitura de JSON e exportação JSON/CSV
-docs/            Documentação técnica
-```
+- **JSON:** salva instrumentos, sessões e metas. Você pode restaurar esse arquivo no SONORA.
+- **CSV:** salva o histórico de sessões para abrir em uma planilha. Não serve para restaurar os dados.
 
-## Verificações
+Ao restaurar um backup, os dados atuais serão substituídos. O SONORA baixa uma cópia deles antes da restauração. Guarde seus arquivos de backup em um local seguro.
 
-Para verificar a sintaxe dos scripts, com Node.js instalado:
+## Para quem desenvolve
+
+O SONORA é um site estático: não tem servidor, instalação de dependências ou etapa de compilação. Para verificar os scripts e executar os testes, instale o [Node.js](https://nodejs.org/) e rode estes comandos na pasta do projeto:
 
 ```powershell
 node --check .\script.js
 node --check .\data-tools.js
+node --test .\tests\sonora.test.js
 ```
 
-O projeto não possui dependências npm nem uma suíte automatizada de testes.
+## Arquivos do projeto
 
-## Documentação
+- `index.html`: estrutura e conteúdo da página.
+- `style.css`: aparência e adaptação para telas menores.
+- `script.js`: funcionalidades e salvamento dos dados.
+- `data-tools.js`: leitura e exportação de arquivos.
+- `tests/`: testes automatizados.
+- `docs/`: documentação técnica.
 
-- [Arquitetura e armazenamento](docs/ARQUITETURA.md)
+Veja também a [documentação da arquitetura](docs/ARQUITETURA.md).
